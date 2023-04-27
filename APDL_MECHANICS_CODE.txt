@@ -9,7 +9,7 @@ FINISH
 length1= 6800			! pillar length, mm
 B1 = 300			! low cross section width, mm
 H1 = 900			! low cross section height, mm
-B2 = 600			! high cross section width, mm
+B2 = 550			! high cross section width, mm
 H2 = 600			! high cross section height, mm
 T1 = 10				! thickness, mm
 
@@ -44,8 +44,8 @@ Density=7.85e-6		! Kg/mm3
 
 
 ! >>>>> other parameters <<<<<
-!FORCE = 2,515   ! load (N/mm)
-!FORCE = 5	 ! load (N/mm)
+UpF = 7690	   ! load (N/mm)
+LwF = 3130	   ! load (N/mm)
 E_length = 100	! element length (mm)
 Eps = 1E-4	! selection tolerance
 
@@ -58,7 +58,7 @@ SECDATA,B1,H1,T1,T1,T1,T1,0,0,0,0,0,0
 
 !section of high pillar
 SECTYPE,   2, BEAM, HREC, high_pillar, 0  
-SECOFFSET, USER, 450, 300   	! Change the origin axis point
+SECOFFSET, USER, 400, 300   	! Change the origin axis point
 SECDATA,B2,H2,T1,T1,T1,T1,0,0,0,0,0,0 
 
 !section of horizontal beam
@@ -125,39 +125,59 @@ Lsel,u,line,,all
 !keypoints for rackets
 
 K,11,length2+length6+length7,length1+B3/2,H3/2+H4/2
-K,12,length2+length6+length7,length1+B3/2-length4,H3/2+H4/2
-K,13,length2+length6+length7,length1+B3/2+length5,H3/2+H4/2
+K,12,length2+length6+length7,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
+K,13,length2+length6+length7,length1+B3/2-length4,H3/2+H4/2
+K,14,length2+length6+length7,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
+K,15,length2+length6+length7,length1+B3/2+length5,H3/2+H4/2
 
 L, 11, 12
-L, 11, 13
-
-K,14,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
-K,15,length2+length6+length7+length8,length1+B3/2-length4,H3/2+H4/2
-K,16,length2+length6+length7+length8,length1+B3/2+length5,H3/2+H4/2
-
+L, 12, 13
+L, 11, 14
 L, 14, 15
-L, 14, 16
 
-K,17,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
-K,18,length2+length6+length7+length8+length9,length1+B3/2-length4,H3/2+H4/2
-K,19,length2+length6+length7+length8+length9,length1+B3/2+length5,H3/2+H4/2
+K,16,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
+K,17,length2+length6+length7+length8,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
+K,18,length2+length6+length7+length8,length1+B3/2-length4,H3/2+H4/2
+K,19,length2+length6+length7+length8,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
+K,20,length2+length6+length7+length8,length1+B3/2+length5,H3/2+H4/2
 
+L, 16, 17
 L, 17, 18
-L, 17, 19
+L, 16, 19
+L, 19, 20
 
-K,20,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
-K,21,length2+length6+length7+length8+2*length9,length1+B3/2-length4,H3/2+H4/2
-K,22,length2+length6+length7+length8+2*length9,length1+B3/2+length5,H3/2+H4/2
+K,21,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
+K,22,length2+length6+length7+length8+length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
+K,23,length2+length6+length7+length8+length9,length1+B3/2-length4,H3/2+H4/2
+K,24,length2+length6+length7+length8+length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
+K,25,length2+length6+length7+length8+length9,length1+B3/2+length5,H3/2+H4/2
 
-L, 20, 21
-L, 20, 22
+L, 21, 22
+L, 22, 23
+L, 21, 24
+L, 24, 25
 
-K,23,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
-K,24,length2+length6+length7+2*length8+2*length9,length1+B3/2-length4,H3/2+H4/2
-K,25,length2+length6+length7+2*length8+2*length9,length1+B3/2+length5,H3/2+H4/2
+K,26,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
+K,27,length2+length6+length7+length8+2*length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
+K,28,length2+length6+length7+length8+2*length9,length1+B3/2-length4,H3/2+H4/2
+K,29,length2+length6+length7+length8+2*length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
+K,30,length2+length6+length7+length8+2*length9,length1+B3/2+length5,H3/2+H4/2
 
-L, 23, 24
-L, 23, 25
+L, 26, 27
+L, 27, 28
+L, 26, 29
+L, 29, 30
+
+K,31,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
+K,32,length2+length6+length7+2*length8+2*length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
+K,33,length2+length6+length7+2*length8+2*length9,length1+B3/2-length4,H3/2+H4/2
+K,34,length2+length6+length7+2*length8+2*length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
+K,35,length2+length6+length7+2*length8+2*length9,length1+B3/2+length5,H3/2+H4/2
+
+L, 31, 32
+L, 32, 33
+L, 31, 34
+L, 34, 35
 
 LESIZE,all,E_length
 Latt,1,,1,,,,5
@@ -166,18 +186,18 @@ Lsel,u,line,,all
 
 
 !keypoints for rigid plates
-K, 26,0,length1,0 
-K, 27,length2+length6+length7,length1+B3/2,H3/2+H4/2
-K, 28,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
-K, 29,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
-K, 30,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
-K, 31,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
-L, 26, 4
-L, 27, 5
-L, 28, 6
-L, 29, 7
-L, 30, 8
-L, 31, 9
+K, 36,0,length1,0 
+K, 37,length2+length6+length7,length1+B3/2,H3/2+H4/2
+K, 38,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
+K, 39,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
+K, 40,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
+K, 41,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
+L, 36, 4
+L, 37, 5
+L, 38, 6
+L, 39, 7
+L, 40, 8
+L, 41, 9
 
 ET,2,184,1,1
 TYPE,2
@@ -200,33 +220,24 @@ Fini
 /SOLUTION
 ANTYPE, STATIC, NEW   !static solution
 
-LSEL, S, LINE, , 9,10		!select the line 9-10
-ESLL, S				!select the element associated to that line
-SFBEAM, ALL, 1, PRES, force	!apply a pressure to that elements
-
-LSEL, S, LINE, , 11,12
-ESLL, S
-SFBEAM, ALL, 1, PRES, force
-
-LSEL, S, LINE, , 13,14
-ESLL, S
-SFBEAM, ALL, 1, PRES, force
-
-LSEL, S, LINE, , 15,16
-ESLL, S
-SFBEAM, ALL, 1, PRES, force
-
-LSEL, S, LINE, , 17,18
-ESLL, S
-SFBEAM, ALL, 1, PRES, force
-
 !Fixed base
 NSEL,S,loc,y,-eps,+eps
 D, ALL,ALL
 allsel,all
 
+ksel,s,kp,,12,32,5
+nslk,s
+F,all,Fz,-LwF
+
+ksel,s,kp,,14,34,5
+nslk,s
+F,all,Fz,-UpF
+
+ALLSEL, all
 !Gravitational acceleration
 Acel,,9.81	!m/s2
+
+
 
 allsel,all,all
 solve

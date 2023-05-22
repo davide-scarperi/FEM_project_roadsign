@@ -1,0 +1,183 @@
+FINISH
+/CLEAR, START, NEW
+/FILNAM,base_plate
+/TITLE, analysis of a plate
+
+/PREP7
+! >>>>> PARAMETERS <<<<<
+! >> Plate dimensions <<
+! xoff = 280 / 2 		! Horizontal offset of the vertical surface
+R1 = 5				! In and out fillet radius, < 7 of the welding
+tk = 10				! Thickness of the plate
+B = 110				! Plate width
+H = 80
+B1 = 30				! P1P2
+B2 = B - B1			! P2P3
+B3 = B1-tk-R1 				! P5P6 
+H1 = 30				! P1P12
+H2 = H - H1			! P12P3
+! R2 = 7				! Corner radius
+L1half = 880 / 2 	! Half of the major length of the plate
+L2half = 280 / 2 	! Half of the minor length of the plate
+
+! >> Hole dimensions <<
+Rh = 15				! Hole radius
+x_ctr = 210			! x coordinate of the centers along L1half
+z_ctr = 170*3		! z coordinate of the centers along L2half
+hdist_vert = 170	! Distance between the centers along L1half
+hdist_hor = 105		! Distance between the centers along L2half
+! >> Bolt and nut dimensions <<
+
+! Key points
+K, 1, L2half, 0, 0
+K, 2, L2half+B1, 0, 0
+K, 3, L2half+B, 0, 0
+K, 4, L2half+B, tk, 0
+K, 5, L2half+B1, tk, 0
+K, 6, L2half+tk+R1, tk, 0
+K, 7, L2half+tk, H1-B3, 0
+K, 8, L2half+tk, H1, 0
+K, 9, L2half+tk, H1+H2, 0
+K, 10, L2half, H1+H2, 0
+K, 11, L2half, H1, 0
+K, 12, L2half, 0, L1half ! To extrude the plate
+
+
+! Lines
+L,1,2
+L,2,3
+L,3,4
+L,4,5
+L,5,6
+
+LOCAL, 11, 1, L2half+B1-B3,H1-B3,0
+CSYS, 11
+L,6,7
+
+CSYS, 0
+L,7,8
+L,8,9
+L,9,10
+L,10,11
+L,11,1
+
+! Lines to creat sub areas
+L,2,5
+L,1,6
+L,1,7
+L,8,11
+
+! Lines to extrude
+L,1,12
+
+! Areas
+AL, 13, 14, 6
+AL, 1, 12, 5, 13
+AL, 2, 3, 4, 12
+AL, 14, 7, 15, 11
+AL, 15, 8, 9, 10
+
+! Volumes
+VDRAG,ALL,,,,,,16
+
+VROTAT,25,21,9,13,,,21,22,-90
+
+K, 32, L2half+110, 0, L1half+110
+K, 33, L2half, 0, L1half+110
+
+L, 18, 32
+L, 32, 33
+L, 33, 28
+
+AL,28,59,60,61,57
+
+VDRAG,40,,,,,,25
+
+NUMMRG,ALL
+NUMCMP,ALL
+
+K, 33, 0, 0, L1half
+
+L, 12, 33
+
+VDRAG, 29, 32, 35, 39, 43,, 66
+
+! Internal Fillet
+LFILLT, 38, 71, R1
+AL, 93, 94, 95
+K, 2000, L2half, H, L1half
+K, 2001, L2half, 0, L1half
+L, 2000, 2001
+VDRAG, 65, ,,,,,96
+
+LDELE, 96
+KDELE,2000, 2001
+
+VADD, ALL ! Union of the volumes
+NUMMRG,ALL
+NUMCMP,ALL
+!  >>> Holes <<<
+! -- Holes along L1half --
+! C1
+K, 1000, x_ctr, tk, 0				! Center of the hole
+K, 1001, x_ctr-Rh, tk, 0			! Startig point 
+K, 1002, x_ctr, H, 0				! To define the axis
+
+! C2
+K, 1003, x_ctr, tk, hdist_vert	
+K, 1004, x_ctr+Rh, tk, hdist_vert	
+K, 1005, x_ctr, H, hdist_vert
+
+! C3	
+K, 1006, x_ctr, tk, 2*hdist_vert
+K, 1007, x_ctr+Rh, tk, 2*hdist_vert
+K, 1008, x_ctr, H, 2*hdist_vert
+
+! -- Corner hole --
+! C4
+K, 1009, x_ctr, tk, z_ctr
+K, 1010, x_ctr+Rh, tk, z_ctr
+K, 1011, x_ctr, H, z_ctr
+
+! -- Holes along L2half --
+! C6
+K, 1015, 0, tk, z_ctr
+K, 1016, 0, tk, z_ctr+Rh
+K, 1017, 0, H, z_ctr
+
+! C5
+K, 1012, hdist_hor, tk, z_ctr
+K, 1013, hdist_hor, tk, z_ctr+Rh
+K, 1014, hdist_hor, H, z_ctr
+
+
+CIRCLE, 1000, Rh, 1002, 1001, 180 
+L, 49, 51
+AL, 93, 94, 95
+
+CIRCLE, 1003, Rh, 1005, 1004
+AL, 96, 97, 98, 99
+
+CIRCLE, 1006, Rh, 1008, 1007
+AL, 100, 101, 102, 103
+
+CIRCLE, 1009, Rh, 1011, 1010
+AL, 104, 105, 106, 107
+
+CIRCLE, 1012, Rh, 1014, 1013
+AL, 108, 109, 110, 111
+
+CIRCLE, 1015, Rh, 1017, 1016, -180
+L, 68, 70
+AL, 112, 113, 114
+
+VDRAG, 46, 47, 48, 49 ,50, 51, 50
+
+VSBV,1,2,,,DELETE, KEEP
+VSBV,8,3,,,DELETE, KEEP
+VSBV,1,4,,,DELETE, KEEP
+VSBV,2,5,,,DELETE, KEEP
+VSBV,1,6,,,DELETE, KEEP
+VSBV,2,7,,,DELETE, KEEP
+
+

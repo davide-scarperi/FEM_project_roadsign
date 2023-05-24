@@ -1,0 +1,655 @@
+FINISH
+/CLEAR, START, NEW
+/FILNAM,base_plate
+/TITLE, analysis of a plate
+
+
+! >>>>> PARAMETERS <<<<<
+
+! >> Plate dimensions <<
+! xoff = 280 / 2 		! Horizontal offset of the vertical surface
+R1 = 10				! In and out fillet radius, < 7 of the welding
+tk = 10				! Thickness of the plate
+B = 110				! Plate width
+H = 70
+B1 = 30				! P1P2
+B2 = B - B1			! P2P3
+B3 = B1-tk-R1 		! P5P6 
+R2 = 7				! Corner radius
+L1half = 880 / 2 	! Half of the major length of the plate
+L2half = 280 / 2 	! Half of the minor length of the plate
+
+! >> Hole dimensions <<
+Rh = 15				! Hole radius
+x_ctr = 210			! x coordinate of the centers along L1half
+z_ctr = 170*3		! z coordinate of the centers along L2half
+hdist_vert = 170	! Distance between the centers along L1half
+hdist_hor = 105		! Distance between the centers along L2half
+
+! >> M27 Nut dimensions <<
+nut_hole_radius = 27/2 		! d
+nut_height = 22				! m
+nut_ext_radius = 45.63/2	! e
+
+
+
+! >> Material properties <<
+E_Young = 210000		! Young's modulus, MPa
+ni = 0.29			! Poisson's ratio
+
+! >> Other parameters <<
+Ndivl1 = 4
+Ndivl2 = 6
+Ndivl3 = 10
+Ndivtk = 4
+Ndivcirc = 4
+Sratio = 2
+
+! Model definition
+/prep7
+MP,EX,1,E_Young
+MP,PRXY,1,ni
+
+ET,7,186
+MP,MU,7,0.5
+MP,MU,1,0.5
+
+! Key points
+K, 1, L2half+R2, 0, 0
+K, 2, L2half+B1+R2, 0, 0
+K, 3, L2half+B+R2, 0, 0
+K, 4, L2half+B+R2, tk, 0
+K, 5, L2half+B1+R2, tk, 0
+K, 6, L2half+tk+R1+R2, tk, 0
+K, 7, L2half+tk+R2, tk+R1, 0
+K, 8, L2half+tk+R2, H, 0
+K, 9, L2half+R2, H, 0
+K, 10, L2half+R2, tk+R1, 0
+K, 11, L2half+R2, 0, L1half ! To extrude the plate
+
+
+! Lines
+L,1,2 		! 1
+L,2,3 		! 2
+L,3,4 		! 3
+L,4,5 		! 4
+L,5,6 		! 5
+
+LOCAL, 11, 1, L2half+B1-B3+R2,tk+R1,0
+CSYS, 11
+L,6,7 		! 6
+
+CSYS, 0
+L,7,8 		! 7
+L,8,9 		! 8
+L,9,10 		! 9
+L,10,1 		! 10
+
+
+! Lines to creat sub areas
+L,2,5		! 11
+L,1,6	    ! 12
+L,7,10 		! 13
+
+! Lines to extrude
+L,1,11		! 14
+
+! LINE DIVISION
+! ricorda: numero di divisioni di una linea deve essere uguale a quello della linea opposta
+LSEL,S,LINE,,1,5,4		! 1-2 5-6
+LESIZE,ALL,,,Ndivl1
+
+LSEL,S,LINE,,6,10,4     ! 6-7 10-1
+LESIZE,ALL,,,Ndivl2
+
+LSEL,S,LINE,,2,4,2		! 2-3 4-5
+LESIZE,ALL,,,Ndivl3
+
+LSEL,S,LINE,,7,9,2      ! 7-8 9-10
+LESIZE,ALL,,,Ndivl2
+
+LSEL,S,LINE,,3,8,5      ! 3-4 8-9
+LSEL,A,LINE,,11,13,1    ! 2-5 1-6 7-10
+LESIZE,ALL,,,Ndivtk
+
+LSEL,S,LINE,,14		    ! 1-11
+LESIZE,ALL,,,2*Ndivl2
+
+ALLSEL,ALL
+
+! Areas
+AL, 2, 3, 4, 11    	! 1
+AL, 1, 11, 5, 12	! 2
+AL, 12, 6, 13, 10 	! 3
+AL, 7, 8, 9, 13 	! 4
+
+
+! Extrude along L2half
+VDRAG,ALL,,,,,,14
+
+! Revolution of a part of the section
+! around the axis at 7 mm from the edge
+LOCAL, 900, 1, L2half,0,L1half,, 90
+CSYS, 900
+K, 900, R2, 0, 0
+K, 901, R2, 90, 0
+L, 900, 901 
+! ncline = _return
+LESIZE, 38,,,Ndivl2
+
+VDRAG, 13,17,21,,,,38
+
+CSYS, 0
+! VROTAT,13,17,21,,,,900,901,-90
+NUMMRG,ALL
+NUMCMP,ALL
+
+! Fill the remaining volume
+K, 30, L2half+110+R2, 0, L1half+110+R2
+K, 31, L2half, 0, L1half+110+R2
+
+L, 13, 30 ! 55
+L, 30, 31 ! 56
+L, 31, 22 ! 57
+
+LSEL,S,LINE,,57
+LESIZE,ALL,,,Ndivl3
+LSEL,S,LINE,,55,56,1
+LESIZE,ALL,,,Ndivl2
+ALLSEL,ALL
+
+AL,55,56,57,39,15
+nlocal = _return
+VDRAG,nlocal,,,,,,18
+
+! Reorder and renumbering all entities
+NUMMRG,ALL
+NUMCMP,ALL
+
+! Extrude along L1half
+K, 35, 0, 0, L1half +R2
+
+L, 21, 35
+nlocal = _return
+LESIZE,nlocal,,,Ndivl2
+
+VDRAG, 38, 26, 30, 34,,, nlocal
+
+!Volume union
+VADD,1,8,9 ! Union of the volumes
+! VADD, ALL
+
+! Reorder and renumbering all entities
+NUMMRG,ALL
+NUMCMP,ALL
+
+!  >>> Holes <<<
+! -- Holes along L1half --
+! C1
+K, 1000, x_ctr+R2, tk, 0				! Center of the hole
+K, 1001, x_ctr-Rh+R2, tk, 0				! Startig point 
+K, 1002, x_ctr+R2, H, 0					! To define the axis
+
+! C2
+K, 1003, x_ctr+R2, tk, hdist_vert	
+K, 1004, x_ctr+Rh+R2, tk, hdist_vert	
+K, 1005, x_ctr+R2, H, hdist_vert
+
+! C3	
+K, 1006, x_ctr+R2, tk, 2*hdist_vert
+K, 1007, x_ctr+Rh+R2, tk, 2*hdist_vert
+K, 1008, x_ctr+R2, H, 2*hdist_vert
+
+! -- Corner hole --
+! C4
+K, 1009, x_ctr+R2, tk, z_ctr+R2
+K, 1010, x_ctr+Rh+R2, tk, z_ctr+R2
+K, 1011, x_ctr+R2, H, z_ctr+R2
+
+! -- Holes along L2half --
+! C6
+K, 1015, 0, tk, z_ctr+R2
+K, 1016, 0, tk, z_ctr+Rh+R2
+K, 1017, 0, H, z_ctr+R2
+
+! C5
+K, 1012, hdist_hor, tk, z_ctr+R2
+K, 1013, hdist_hor, tk, z_ctr+Rh+R2
+K, 1014, hdist_hor, H, z_ctr+R2
+
+
+CIRCLE, 1000, Rh, 1002, 1001, 180 
+L, 43, 45 				! 82
+AL, 86, 87, 88			! 40
+
+CIRCLE, 1003, Rh, 1005, 1004
+AL, 89, 90, 91, 92		! 41
+
+CIRCLE, 1006, Rh, 1008, 1007
+AL, 93, 94, 95, 96		! 42
+
+CIRCLE, 1009, Rh, 1011, 1010
+AL, 97, 98, 99, 100		! 43
+
+CIRCLE, 1012, Rh, 1014, 1013
+AL, 101, 102, 103, 104		! 44
+
+CIRCLE, 1015, Rh, 1017, 1016, -180
+L, 62, 64
+AL, 105, 106, 107			! 45
+
+! Meshing the holes
+LSEL,S,LINE,,86, 87
+LSEL,A,LINE,,89, 106 	! Full holes
+LESIZE,ALL,,,Ndivcirc
+
+ALLSEL,ALL
+
+! Create the hole portion to be subtracted
+ASEL, S, AREA,, 55, 60
+VDRAG, ALL,,,,,, 3
+
+ALLSEL
+
+! Subtract the hole portion
+VSBV, 10, 11,,,DELETE, KEEP
+VSBV, 17, 12,,,DELETE, KEEP
+VSBV, 10, 13,,,DELETE, KEEP
+VSBV, 11, 14,,,DELETE, KEEP
+VSBV, 10, 15,,,DELETE, KEEP
+VSBV, 11, 16,,,DELETE, KEEP
+
+NUMMRG,ALL
+NUMCMP,ALL
+
+!MESHING
+TYPE,1
+MAT,1
+MSHAPE,0,3D
+MSHKEY,1
+VMESH,1,9,1
+
+TYPE,1
+MAT,1
+MSHAPE,1,3D
+MSHKEY,0
+VMESH,10
+! -----------------------------------------------------
+
+
+!  >>> M27 Nut <<<
+pi = acos(-1)
+! --- N1 ---
+LOCAL, 2000, 1, x_ctr+R2, tk, 0,, -90
+CSYS, 2000
+! Outer points
+K, 2000, 0, 0, 0			! To define the axis
+K, 2001, 0, 0, nut_height	! To define the axis
+
+K, 2002, nut_ext_radius, 0, 0
+K, 2003, nut_ext_radius, -60, 0
+K, 2004, nut_ext_radius, -120, 0
+K, 2005, nut_ext_radius, -180, 0
+! Inner points
+K, 2006, nut_hole_radius, 0, 0
+K, 2007, nut_hole_radius, -60, 0
+K, 2008, nut_hole_radius, -120, 0
+K, 2009, nut_hole_radius, -180, 0
+
+L, 2006, 2007
+L, 2007, 2008
+L, 2008, 2009
+L, 2009, 2006
+
+CSYS, 0
+L, 2002, 2003
+L, 2003, 2004
+L, 2004, 2005
+L, 2005, 2002
+L, 2000, 2001
+naxis = _return ! Store the ID of the last line
+
+! Extrude the full volume
+KSEL, S, KP,, 2002, 2005
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+! KSEL, S, KP,, 2000, 2001
+! LSLK, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2006, 2009
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+! --- N2 ---
+LOCAL, 2010, 1, x_ctr+R2, tk, hdist_vert,, -90
+CSYS, 2010
+K, 2010, 0, 0, 0			! To define the axis
+K, 2011, 0, 0, nut_height	! To define the axis
+
+! Outer points
+K, 2012, nut_ext_radius, 0, 0
+K, 2013, nut_ext_radius, 60, 0
+K, 2014, nut_ext_radius, 120, 0
+K, 2015, nut_ext_radius, 180, 0
+K, 2016, nut_ext_radius, 240, 0
+K, 2017, nut_ext_radius, 300, 0
+
+
+! Inner points
+K, 2018, nut_hole_radius, 0, 0
+K, 2019, nut_hole_radius, 60, 0
+K, 2020, nut_hole_radius, 120, 0
+K, 2021, nut_hole_radius, 180, 0
+K, 2022, nut_hole_radius, 240, 0
+K, 2023, nut_hole_radius, 300, 0
+
+L, 2018, 2019
+L, 2019, 2020
+L, 2020, 2021
+L, 2021, 2022
+L, 2022, 2023
+L, 2023, 2018
+
+CSYS, 0
+L, 2012, 2013
+L, 2013, 2014
+L, 2014, 2015
+L, 2015, 2016
+L, 2016, 2017
+L, 2017, 2012
+
+L, 2010, 2011
+naxis = _return 
+
+! Extrude the full volume
+KSEL, S, KP,, 2012, 2017
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2018, 2023
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+! --- N3 ---
+LOCAL, 2024, 1, x_ctr+R2, tk, 2*hdist_vert,, -90
+CSYS, 2024
+K, 2024, 0, 0, 0			! To define the axis
+K, 2025, 0, 0, nut_height	! To define the axis
+
+! Outer points
+K, 2026, nut_ext_radius, 0, 0
+K, 2027, nut_ext_radius, 60, 0
+K, 2028, nut_ext_radius, 120, 0
+K, 2029, nut_ext_radius, 180, 0
+K, 2030, nut_ext_radius, 240, 0
+K, 2031, nut_ext_radius, 300, 0
+
+
+! Inner points
+K, 2032, nut_hole_radius, 0, 0
+K, 2033, nut_hole_radius, 60, 0
+K, 2034, nut_hole_radius, 120, 0
+K, 2035, nut_hole_radius, 180, 0
+K, 2036, nut_hole_radius, 240, 0
+K, 2037, nut_hole_radius, 300, 0
+
+L, 2032, 2033
+L, 2033, 2034
+L, 2034, 2035
+L, 2035, 2036
+L, 2036, 2037
+L, 2037, 2032
+
+CSYS, 0
+L, 2026, 2027
+L, 2027, 2028
+L, 2028, 2029
+L, 2029, 2030
+L, 2030, 2031
+L, 2031, 2026
+
+L, 2024, 2025
+naxis = _return
+
+! Extrude the full volume
+KSEL, S, KP,, 2026, 2031
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2032, 2037
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+! --- N4 ---
+LOCAL, 2038, 1, x_ctr+R2, tk, z_ctr+R2,, -90
+CSYS, 2038
+K, 2038, 0, 0, 0			! To define the axis
+K, 2039, 0, 0, nut_height	! To define the axis
+
+! Outer points
+K, 2040, nut_ext_radius, 0, 0
+K, 2041, nut_ext_radius, 60, 0
+K, 2042, nut_ext_radius, 120, 0
+K, 2043, nut_ext_radius, 180, 0
+K, 2044, nut_ext_radius, 240, 0
+K, 2045, nut_ext_radius, 300, 0
+
+
+! Inner points
+K, 2046, nut_hole_radius, 0, 0
+K, 2047, nut_hole_radius, 60, 0
+K, 2048, nut_hole_radius, 120, 0
+K, 2049, nut_hole_radius, 180, 0
+K, 2050, nut_hole_radius, 240, 0
+K, 2051, nut_hole_radius, 300, 0
+
+L, 2046, 2047
+L, 2047, 2048
+L, 2048, 2049
+L, 2049, 2050
+L, 2050, 2051
+L, 2051, 2046
+
+CSYS, 0
+L, 2040, 2041
+L, 2041, 2042
+L, 2042, 2043
+L, 2043, 2044
+L, 2044, 2045
+L, 2045, 2040
+
+L, 2038, 2039
+naxis = _return
+
+! Extrude the full volume
+KSEL, S, KP,, 2040, 2045
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2046, 2051
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+
+! --- N5 ---
+LOCAL, 2052, 1, hdist_hor, tk, z_ctr+R2,, -90
+CSYS, 2052
+K, 2052, 0, 0, 0			! To define the axis
+K, 2053, 0, 0, nut_height	! To define the axis
+
+! Outer points
+K, 2054, nut_ext_radius, 0, 0
+K, 2055, nut_ext_radius, 60, 0
+K, 2056, nut_ext_radius, 120, 0
+K, 2057, nut_ext_radius, 180, 0
+K, 2058, nut_ext_radius, 240, 0
+K, 2059, nut_ext_radius, 300, 0
+
+
+! Inner points
+K, 2060, nut_hole_radius, 0, 0
+K, 2061, nut_hole_radius, 60, 0
+K, 2062, nut_hole_radius, 120, 0
+K, 2063, nut_hole_radius, 180, 0
+K, 2064, nut_hole_radius, 240, 0
+K, 2065, nut_hole_radius, 300, 0
+
+L, 2060, 2061
+L, 2061, 2062
+L, 2062, 2063
+L, 2063, 2064
+L, 2064, 2065
+L, 2065, 2060
+
+CSYS, 0
+L, 2054, 2055
+L, 2055, 2056
+L, 2056, 2057
+L, 2057, 2058
+L, 2058, 2059
+L, 2059, 2054
+
+L, 2052, 2053
+naxis = _return
+
+! Extrude the full volume
+KSEL, S, KP,, 2054, 2059
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2060, 2065
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+
+! --- N6 ---
+LOCAL, 2066, 1, 0, tk, z_ctr+R2,, -90
+CSYS, 2066
+K, 2066, 0, 0, 0			! To define the axis
+K, 2067, 0, 0, nut_height	! To define the axis
+
+! Outer points
+K, 2068, nut_ext_radius, 90, 0
+K, 2069, nut_ext_radius, 90-60, 0
+K, 2070, nut_ext_radius, 90-120, 0
+K, 2071, nut_ext_radius, 90-180, 0
+
+! Inner points
+K, 2072, nut_hole_radius, 90, 0
+K, 2073, nut_hole_radius, 90-60, 0
+K, 2074, nut_hole_radius, 90-120, 0
+K, 2075, nut_hole_radius, 90-180, 0
+
+L, 2072, 2073
+L, 2073, 2074
+L, 2074, 2075
+
+CSYS, 0
+L, 2075, 2072
+L, 2068, 2069
+L, 2069, 2070
+L, 2070, 2071
+L, 2071, 2068
+
+L, 2066, 2067
+naxis = _return
+
+! Extrude the full volume
+KSEL, S, KP,, 2068, 2071
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vout = _return
+
+ALLSEL
+
+! Extrude the inner volume
+KSEL, S, KP,, 2072, 2075
+LSLK, S, 0
+AL, ALL
+ASLL, S, 0
+VDRAG, ALL,,,,,, naxis
+vin = _return
+
+VSBV, vout, vin,,,DELETE, KEEP
+
+ALLSEL
+
+
+
+
+
+
+
+
+
+
+
+
+

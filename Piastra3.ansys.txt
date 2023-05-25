@@ -31,6 +31,9 @@ nut_hole_radius = 27/2 		! d
 nut_height = 22				! m
 nut_ext_radius = 45.63/2	! e
 
+! >> Ground plate dimensions <<
+L1 = (L1half+B)*1.3
+L2 = (L2half+B)*2.6
 
 
 ! >> Material properties <<
@@ -38,9 +41,9 @@ E_Young = 210000		! Young's modulus, MPa
 ni = 0.29			! Poisson's ratio
 
 ! >> Other parameters <<
-Ndivl1 = 4
-Ndivl2 = 6
-Ndivl3 = 10
+Ndivl1 = 4*3
+Ndivl2 = 6*3
+Ndivl3 = 10*3
 Ndivtk = 4
 Ndivcirc = 4
 Sratio = 2
@@ -269,12 +272,14 @@ MSHAPE,0,3D
 MSHKEY,1
 VMESH,1,9,1
 
+ESIZE, 2
 TYPE,1
 MAT,1
 MSHAPE,1,3D
 MSHKEY,0
 VMESH,10
 ! -----------------------------------------------------
+
 
 
 !  >>> M27 Nut <<<
@@ -641,8 +646,53 @@ VSBV, vout, vin,,,DELETE, KEEP
 
 ALLSEL
 
+VSYMM,X, ALL,,,,0,0
 
 
+! Ground Flange
+ET, 2, TARGE170
+ET, 3, CONTA174
+
+KEYOPT, 3, 2, 0		! Contact algorithm: Augmented Lagrange
+KEYOPT, 3, 7, 1		! Element level time incrementation control: Automatic bisection of increment
+KEYOPT, 3, 9, 2		! Include both initial geometrical penetration or gap and offset, but with ramped effect
+KEYOPT, 3, 10, 2	! Contact stiffness update: each iteration
+R, 1	
+
+TYPE, 3
+REAL, 1
+NSEL, S, LOC, Y, 0
+ESURF
+ALLSEL, ALL
+
+K, 3000, L2/2, 0, 0
+K, 3001, L2/2, 0, L1
+K, 3002, -L2/2, 0, L1
+K, 3003, -L2/2, 0, 0
+
+L, 3000, 3001	
+L, 3001, 3002
+L, 3002, 3003
+L, 3003, 3000
+
+KSEL, S, KP,, 3000, 3003
+LSLK, S, 0
+AL, ALL
+groundarea = _return
+
+! LESIZE, ALL, Ndivl2
+
+ASEL, S, AREA,, groundarea
+TYPE, 2
+REAL, 1
+ESIZE,, 6
+AMESH, ALL
+
+ASEL, S, AREA,, groundarea
+NSLA, S, 1
+D, ALL, ALL
+
+ALLSEL
 
 
 

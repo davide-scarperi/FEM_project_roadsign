@@ -237,9 +237,26 @@ ALLSEL, all
 !Gravitational acceleration
 Acel,,9.81	!m/s2
 
-
-
 allsel,all,all
 solve
 save
 fini
+
+/POST1
+set,last
+ETABLE, axI, SMISC, 1 		!axial force I
+ETABLE, axJ, SMISC, 14 		!axial force J
+ETABLE, shearyI, SMISC, 6 	!shear I
+ETABLE, shearyJ, SMISC, 19 	!shear J
+ETABLE, shearzI, SMISC, 5	!shear I
+ETABLE, shearzj, SMISC, 18 	!shear J
+ETABLE, momxI, SMISC, 4 	!moment z in I
+ETABLE, momxJ, SMISC, 17 	!moment z in J
+ETABLE, momzI, SMISC, 3 	!moment z in I
+ETABLE, momzJ, SMISC, 16 	!moment z in J
+ETABLE, momyI, SMISC, 2 	!moment z in I
+ETABLE, momyJ, SMISC, 15 	!moment z in J
+ETABLE, bsigmaI, SMISC, 32 	!bending stress in I
+ETABLE, bsigmaJ, SMISC, 37 	!bending stress in J
+ETABLE, asigmaI, SMISC, 31 	!axial stress in I
+ETABLE, asigmaJ, SMISC, 36 	!axial stress in J

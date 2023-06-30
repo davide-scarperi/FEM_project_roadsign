@@ -10,9 +10,10 @@ FINISH
 
 ! >> Plate dimensions <<
 R1 = 10				! In and out fillet radius, < 7 of the welding
-tk = 10				! Thickness of the plate
+tk = 10				! Thickness of the vertical plate 
+tko = 30			! Thickness of the orizontal plate
 B = 110				! Plate width
-H = 70
+H = 100
 B1 = 30				! P1P2
 B2 = B - B1			! P2P3
 B3 = B1-tk-R1 			! P5P6 
@@ -72,12 +73,12 @@ MP,MU,1,0.5
 ! Key points
 K, 1, L2half+R2, 0, 0
 K, 2, L2half+B1+R2, 0, 0
-K, 3, L2half+B1+R2, tk, 0
-K, 4, L2half+tk+R1+R2, tk, 0
-K, 5, L2half+tk+R2, tk+R1, 0
+K, 3, L2half+B1+R2, tko, 0
+K, 4, L2half+tk+R1+R2, tko, 0
+K, 5, L2half+tk+R2, tko+R1, 0
 K, 6, L2half+tk+R2, H, 0
 K, 7, L2half+R2, H, 0
-K, 8, L2half+R2, tk+R1, 0
+K, 8, L2half+R2, tko+R1, 0
 K, 9, L2half+R2, 0, L1half ! To extrude the plate
 
 ! Lines
@@ -85,7 +86,7 @@ L,1,2 		! 1
 L,2,3 		! 2
 L,3,4 		! 3
 
-LOCAL, 11, 1, L2half+B1-B3+R2,tk+R1,0
+LOCAL, 11, 1, L2half+B1-B3+R2,tko+R1,0
 CSYS, 11
 L,4,5 		! 4
 
@@ -451,7 +452,7 @@ VMESH,1,37,1
 !------------------------------------!
 
 ! --- N1 ---
-LOCAL, 2000, 1, x_ctr+R2, tk, 0,, -90
+LOCAL, 2000, 1, x_ctr+R2, tko, 0,, -90
 CSYS, 2000
 ! Outer points
 K, 2000, 0, 0, 0			! To define the axis
@@ -505,7 +506,7 @@ VSBV, vout, vin,,,DELETE, KEEP
 ALLSEL
 
 ! --- N2 ---
-LOCAL, 2001, 1, x_ctr+R2, tk, hdist_vert,, -90
+LOCAL, 2001, 1, x_ctr+R2, tko, hdist_vert,, -90
 CSYS, 2001
 K, 2010, 0, 0, 0			! To define the axis
 K, 2011, 0, 0, nut_height	! To define the axis
@@ -578,25 +579,25 @@ VTRAN, KCNTO, 41
 
 ! Copy volumes
 ! --- N3 ---
-LOCAL, 2002, 1, x_ctr+R2, tk, 2*hdist_vert,, -90
+LOCAL, 2002, 1, x_ctr+R2, tko, 2*hdist_vert,, -90
 CSYS, 2001
 VTRAN, 2002, 41
 CSYS,0
 
 ! --- N4 ---
-LOCAL, 2003, 1, x_ctr+R2, tk, z_ctr+R2,, -90
+LOCAL, 2003, 1, x_ctr+R2, tko, z_ctr+R2,, -90
 CSYS, 2001
 VTRAN, 2003, 41
 CSYS, 0
 
 ! --- N5 ---
-LOCAL, 2004, 1, hdist_hor, tk, z_ctr+R2,, -90
+LOCAL, 2004, 1, hdist_hor, tko, z_ctr+R2,, -90
 CSYS, 2001
 VTRAN, 2004, 41
 CSYS, 0
 
 ! --- N6 ---
-LOCAL, 2005, 1, 0, tk, z_ctr+R2, 90, 0, 90
+LOCAL, 2005, 1, 0, tko, z_ctr+R2, 90, 0, 90
 CSYS, 2000
 VTRAN, 2005, 40
 CSYS, 0

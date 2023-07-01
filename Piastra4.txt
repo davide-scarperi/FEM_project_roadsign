@@ -452,60 +452,6 @@ VMESH,1,37,1
 !------------------------------------!
 
 ! --- N1 ---
-LOCAL, 2000, 1, x_ctr+R2, tko, 0,, -90
-CSYS, 2000
-! Outer points
-K, 2000, 0, 0, 0			! To define the axis
-K, 2001, 0, 0, nut_height	! To define the axis
-
-K, 2002, nut_ext_radius, 0, 0
-K, 2003, nut_ext_radius, -60, 0
-K, 2004, nut_ext_radius, -120, 0
-K, 2005, nut_ext_radius, -180, 0
-! Inner points
-K, 2006, nut_hole_radius, 0, 0
-K, 2007, nut_hole_radius, -60, 0
-K, 2008, nut_hole_radius, -120, 0
-K, 2009, nut_hole_radius, -180, 0
-
-L, 2006, 2007
-L, 2007, 2008
-L, 2008, 2009
-L, 2009, 2006
-
-CSYS, 0
-L, 2002, 2003
-L, 2003, 2004
-L, 2004, 2005
-L, 2005, 2002
-L, 2000, 2001
-naxis = _return ! Store the ID of the last line
-
-! Extrude the full volume
-KSEL, S, KP,, 2002, 2005
-LSLK, S, 0
-AL, ALL
-ASLL, S, 0
-! KSEL, S, KP,, 2000, 2001
-! LSLK, S, 0
-VDRAG, ALL,,,,,, naxis
-vout = _return
-
-ALLSEL
-
-! Extrude the inner volume
-KSEL, S, KP,, 2006, 2009
-LSLK, S, 0
-AL, ALL
-ASLL, S, 0
-VDRAG, ALL,,,,,, naxis
-vin = _return
-
-VSBV, vout, vin,,,DELETE, KEEP
-
-ALLSEL
-
-! --- N2 ---
 LOCAL, 2001, 1, x_ctr+R2, tko, hdist_vert,, -90
 CSYS, 2001
 K, 2010, 0, 0, 0			! To define the axis
@@ -546,6 +492,13 @@ L, 2017, 2012
 L, 2010, 2011
 naxis = _return 
 
+!Nut lines division
+LSEL,S,LINE,,naxis-13, naxis-1
+LESIZE,ALL,,,L1division/2
+LSEL,S,LINE,,naxis
+LESIZE,ALL,,,Ndivtk
+ALLSEL,ALL
+
 ! Extrude the full volume
 KSEL, S, KP,, 2012, 2017
 LSLK, S, 0
@@ -567,41 +520,33 @@ vin = _return
 VSBV, vout, vin,,,DELETE, KEEP
 
 ALLSEL
-VTRAN, KCNTO, 41
+VTRAN, KCNTO, 40
 
-
-
-!-----------------------------------------!
-!! Da fare: mesh prima di copiare i dadi !!
-!-----------------------------------------!
-
-
+!-------NUT MESH------!
+TYPE,1
+MAT,1
+MSHAPE,1,3D
+MSHKEY,0
+VMESH,40
 
 ! Copy volumes
-! --- N3 ---
+! --- N2 ---
 LOCAL, 2002, 1, x_ctr+R2, tko, 2*hdist_vert,, -90
 CSYS, 2001
-VTRAN, 2002, 41
+VTRAN, 2002, 40
 CSYS,0
 
-! --- N4 ---
+! --- N3 ---
 LOCAL, 2003, 1, x_ctr+R2, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2003, 41
+VTRAN, 2003, 40
 CSYS, 0
 
-! --- N5 ---
+! --- N4 ---
 LOCAL, 2004, 1, hdist_hor, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2004, 41
+VTRAN, 2004, 40
 CSYS, 0
-
-! --- N6 ---
-LOCAL, 2005, 1, 0, tko, z_ctr+R2, 90, 0, 90
-CSYS, 2000
-VTRAN, 2005, 40
-CSYS, 0
-
 
 ! Specchiare tutte le facce
 VSYMM,X, ALL,,,,0,0
@@ -609,11 +554,58 @@ ALLSEL
 VSYMM,z, ALL,,,,0,0
 ALLSEL
 
+! -----NUTS ON THE EDGE
+
+! --- N5 ---
+LOCAL, 2005, 1, x_ctr+R2, tko, 0,, -90
+CSYS, 2001
+VTRAN, 2005, 40
+CSYS, 0
+
+! --- N6 ---
+LOCAL, 2006, 1, 0, tko, z_ctr+R2, 0,, -90
+CSYS, 2001
+VTRAN, 2006, 40
+CSYS, 0
+
+! --- N7 ---
+LOCAL, 2007, 1, -x_ctr-R2, tko, 0,, -90
+CSYS, 2001
+VTRAN, 2007, 40
+CSYS, 0
+
+! --- N8 ---
+LOCAL, 2008, 1, 0, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2008, 40
+CSYS, 0
 
 
+!-------CONTACT MESH----!
+ET,4,TARGE170
+ET,5,CONTA174
+KEYOPT, 5, 2, 0 !Contact algorithm: Augmented Lagrangian
+KEYOPT, 5, 7, 1 !Element level time incrementation control: Automatic bisection of increment
+KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset, but with ramped effects
+KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
+R,2
 
+TYPE,5
+REAL,2
 
+CSYS,2001
+NSEL,S,LOC,X,Rh,2*Rh
+NSEL,R,LOC,Z,0
+ESURF
+ALLSEL,all
 
+TYPE,4
+REAL,2
+ASEL,S,LOC,X,0,2*Rh
+ASEL,R,LOC,Z,0
+NSLA,S,1
+ESURF
+ALLSEL,all
 
 
 

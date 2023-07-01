@@ -36,9 +36,7 @@ nut_hole_radius = 27/2 		! d
 nut_height = 22			! m
 nut_ext_radius = 45.63/2	! e
 
-! >> Ground plate dimensions <<
-L1 = (L1half+B)*1.3
-L2 = (L2half+B)*2.6
+Eps = 1E-4	! selection tolerance
 
 
 ! >> Material properties <<
@@ -447,6 +445,13 @@ MSHAPE,0,3D
 MSHKEY,1
 VMESH,1,37,1
 
+
+! Specchiare tutte le facce
+VSYMM,X, ALL,,,,0,0
+ALLSEL
+VSYMM,z, ALL,,,,0,0
+ALLSEL
+
 !------------------------------------!
 !!>>>>>>>>>>>>> M27 Nut <<<<<<<<<<<<!!
 !------------------------------------!
@@ -520,87 +525,155 @@ vin = _return
 VSBV, vout, vin,,,DELETE, KEEP
 
 ALLSEL
-VTRAN, KCNTO, 40
+VTRAN, KCNTO, 151
 
 !-------NUT MESH------!
 TYPE,1
 MAT,1
 MSHAPE,1,3D
 MSHKEY,0
-VMESH,40
+VMESH,151
 
 ! Copy volumes
 ! --- N2 ---
 LOCAL, 2002, 1, x_ctr+R2, tko, 2*hdist_vert,, -90
 CSYS, 2001
-VTRAN, 2002, 40
+VTRAN, 2002, 151
 CSYS,0
 
 ! --- N3 ---
 LOCAL, 2003, 1, x_ctr+R2, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2003, 40
+VTRAN, 2003, 151
 CSYS, 0
 
 ! --- N4 ---
 LOCAL, 2004, 1, hdist_hor, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2004, 40
+VTRAN, 2004, 151
 CSYS, 0
 
-! Specchiare tutte le facce
-VSYMM,X, ALL,,,,0,0
-ALLSEL
-VSYMM,z, ALL,,,,0,0
-ALLSEL
-
-! -----NUTS ON THE EDGE
-
 ! --- N5 ---
-LOCAL, 2005, 1, x_ctr+R2, tko, 0,, -90
+LOCAL, 2005, 1, 0, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2005, 40
+VTRAN, 2005, 151
 CSYS, 0
 
 ! --- N6 ---
-LOCAL, 2006, 1, 0, tko, z_ctr+R2, 0,, -90
+LOCAL, 2006, 1, -hdist_hor, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2006, 40
+VTRAN, 2006, 151
 CSYS, 0
 
 ! --- N7 ---
-LOCAL, 2007, 1, -x_ctr-R2, tko, 0,, -90
+LOCAL, 2007, 1, -x_ctr-R2, tko, z_ctr+R2,, -90
 CSYS, 2001
-VTRAN, 2007, 40
+VTRAN, 2007, 151
 CSYS, 0
 
 ! --- N8 ---
-LOCAL, 2008, 1, 0, tko, -z_ctr-R2,, -90
+LOCAL, 2008, 1,  -x_ctr-R2, tko, 2*hdist_vert,, -90
 CSYS, 2001
-VTRAN, 2008, 40
+VTRAN, 2008, 151
+CSYS, 0
+
+! --- N9 ---
+LOCAL, 2009, 1, -x_ctr-R2, tko, hdist_vert,, -90
+CSYS, 2001
+VTRAN, 2009, 151
+CSYS, 0
+
+! --- N10 ---
+LOCAL, 2010, 1, -x_ctr-R2, tko, 0,, -90			!--------------------------------------------
+CSYS, 2001
+VTRAN, 2010, 151
+CSYS, 0
+
+! --- N11 ---
+LOCAL, 2011, 1, -x_ctr-R2, tko, -hdist_vert,, -90
+CSYS, 2001
+VTRAN, 2011, 151
+CSYS, 0
+
+! --- N12 ---
+LOCAL, 2012, 1,  -x_ctr-R2, tko, -2*hdist_vert,, -90
+CSYS, 2001
+VTRAN, 2012, 151
+CSYS, 0
+
+! --- N13 ---
+LOCAL, 2013, 1, -x_ctr-R2, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2013, 151
+CSYS, 0
+
+! --- N14 ---
+LOCAL, 2014, 1, -hdist_hor, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2014, 151
+CSYS, 0
+
+! --- N15 ---
+LOCAL, 2015, 1, 0, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2015, 151
+CSYS, 0
+
+! --- N16 ---
+LOCAL, 2016, 1, hdist_hor, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2016, 151
+CSYS, 0
+
+! --- N17 ---
+LOCAL, 2017, 1, x_ctr+R2, tko, -z_ctr-R2,, -90
+CSYS, 2001
+VTRAN, 2017, 151
+CSYS, 0
+
+! --- N18 ---
+LOCAL, 2018, 1, x_ctr+R2, tko, -2*hdist_vert,, -90
+CSYS, 2001
+VTRAN, 2018, 151
+CSYS,0
+
+! --- N19 ---
+LOCAL, 2019, 1, x_ctr+R2, tko, -hdist_vert,, -90
+CSYS, 2001
+VTRAN, 2019, 151
+CSYS, 0
+
+! --- N20 ---
+LOCAL, 2020, 1, x_ctr+R2, tko, 0,, -90
+CSYS, 2001
+VTRAN, 2020, 151
 CSYS, 0
 
 
 !-------CONTACT MESH----!
+
 ET,4,TARGE170
 ET,5,CONTA174
 KEYOPT, 5, 2, 0 !Contact algorithm: Augmented Lagrangian
 KEYOPT, 5, 7, 1 !Element level time incrementation control: Automatic bisection of increment
 KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset, but with ramped effects
 KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
-R,2
+
+! --- N1 ---
+
+*DO,i,2001,2020,1
 
 TYPE,5
-REAL,2
+REAL,i-2000+1
 
-CSYS,2001
+CSYS,i
 NSEL,S,LOC,X,Rh,2*Rh
 NSEL,R,LOC,Z,0
 ESURF
 ALLSEL,all
 
 TYPE,4
-REAL,2
+REAL,i-2000+1
 ASEL,S,LOC,X,0,2*Rh
 ASEL,R,LOC,Z,0
 NSLA,S,1
@@ -608,5 +681,37 @@ ESURF
 ALLSEL,all
 
 
+*ENDDO
 
+CSYS,0
+ALLSEL,ALL
+
+! ---- CONSTRAINTS ---- 
+
+!Fixed base
+NSEL,S,loc,y,-eps,+eps
+D, ALL,ALL
+allsel,all
+
+!Fix ortizontal displ. of the nuts
+VSEL, S ,VOLU,,149,169,1 
+NSLV,S,1
+D, ALL,ux,Eps,,,,UZ
+
+! --- MPC LOADS ---
+
+*GET, max_node, NODE, 0, NUM, MAXD
+N,max_node+10,0,1.1*H,0 !create 'master' node for MPC184's
+ET,6,184
+KEYOPT,6,1,1
+TYPE,6
+
+NSEL, S, LOC, Y, H-eps,H+eps
+*GET, num_nodes, NODE, 0, COUNT
+*DO, ii, 1, num_nodes,1
+*GET, n_node, NODE, 0, NUM, MAX
+E,max_node+10,n_node
+NSEL, U, NODE, , n_node
+*ENDDO
+ALLSEL, ALL
 

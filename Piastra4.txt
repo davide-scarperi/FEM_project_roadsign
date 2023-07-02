@@ -60,6 +60,7 @@ Sigmay = -31e3
 Mfx = 425e6
 Mty = 299e6		!vertical axis
 Mfz = -88.5e5		!eing axis
+Ftz = 10
 Preload = 100000/6		!Mpa
 
 
@@ -746,23 +747,18 @@ NSUBST,5
 eqslv,pcg
 
 *DO,ii,0,5
-SLOAD,723+ii,PL01,lock,forc,preload,1,2
+SLOAD,723+ii,PL01,lock, forc,preload,1,2
 *ENDDO
 
 *DO,iii,0,18
 *DO,ii,0,5
-SLOAD,731+14*iii+ii,PL01,lock,forc,preload,1,2
+SLOAD,731+14*iii+ii, PL01, lock, forc, preload,1,2
 *ENDDO
 *ENDDO
 
 MODE,0,0
 NSEL,S,LOC,Y,Hm-eps,Hm+eps
-SF,ALL,PRES,Py
-ALLSEL,ALL
-
-MODE,0,0
-NSEL,S,LOC,Y,H-eps,H+eps
-SF,ALL,PRES,Fny
+SF, ALL, PRES, Sigmay
 ALLSEL,ALL
 
 LSWRITE,1

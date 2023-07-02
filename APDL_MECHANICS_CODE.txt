@@ -4,19 +4,20 @@ FINISH
 /FILNAM,road_sign
 /TITLE,simply first version
 
-! >>>>> PILLAR PARAMETERS <<<<<
+! >>>>> VERTICAL PILLAR PARAMETERS <<<<<
 
-length1= 6800			! pillar length, mm
+L1 = 6800			! pillar length, mm
 B1 = 300			! low cross section width, mm
 H1 = 900			! low cross section height, mm
-B2 = 550			! high cross section width, mm
+B2 = 600			! high cross section width, mm
 H2 = 600			! high cross section height, mm
 T1 = 10				! thickness, mm
 
 ! >>>>> HORIZONTAL BEAM PARAMETERS <<<<<
 
-length2= 1390			! first beam length, mm
-length3= 6000			! second beam length, mm
+! length2= 1420			! first beam length, mm
+! length3= 6000			! second beam length, mm
+L2 = 7420			! pillar length, mm
 B3 = 400			! high cross section width, mm
 H3 = 600			! high cross section height, mm
 T2 = 8				! thickness, mm
@@ -26,15 +27,21 @@ T3 = 30				! thickness, mm
 
 ! >>>>> RACKETS PARAMETERS <<<<<
 
-length4= 1200			! racket length, mm
-length5= 3100			! racket length, mm
+Lrackdown= 1200			! racket length, mm
+Lrackup= 3100			! racket length, mm
 B4 = 60				! cross section width, mm
 H4 = 100			! cross section height, mm
 
-length6 = 2130			! distances, mm
-length7 = 350			! distances, mm
-length8 = 800			! distances, mm
-length9 = 850			! distances, mm
+d1 = 1390 + 2130 + 350				! distances, mm
+d2 = 800 							! distances, mm
+d3 = 850							! distances, mm
+d4 = 850							! distances, mm
+d5 = 800							! distances, mm
+d6 = L2 - d1 - d2 - d3 - d4 - d5	! distances, mm
+! length6 = 2130			! distances, mm
+! length7 = 350			! distances, mm
+! d2 = 800			! distances, mm
+! d3 = 850			! distances, mm
 
 
 ! >>>>> MATERIAL PROPERTIES <<<<<
@@ -68,7 +75,7 @@ SECDATA,B3,H3,T2,T2,T2,T2,0,0,0,0,0,0
 !Section of taper beam
 SECTYPE,   4, TAPER, , taper_pillar
 SECDATA,   1,,,,
-SECDATA,   2,0,length1,,
+SECDATA,   2,0,L1,,
 
 !Section of the rackets
 SECTYPE,   5, BEAM, RECT,racket,0
@@ -77,11 +84,11 @@ SECDATA,B4,H4
 !Material definition
 MP, EX, 1, E_Young
 MP, PRXY, 1, ni
-MP,dens,1,density
+MP,dens,1, density
 
 !keypoints pillar
 K,1,0,0,0
-K,2,0,length1,0 
+K,2,0,L1,0 
 L, 1, 2  
 
 LESIZE, all,E_length
@@ -91,14 +98,14 @@ LMESH, 1
 Lsel,u,line,,all
 
 !keypoint first h. beam
-K,3, -B1/2, length1+B3/2,0
-K,4, 0, length1+B3/2,0
-K,5, length2+length6+length7, length1+B3/2,0
-K,6, length2+length6+length7+length8, length1+B3/2,0
-K,7, length2+length6+length7+length8+length9, length1+B3/2,0
-K,8, length2+length6+length7+length8+2*length9, length1+B3/2,0
-K,9, length2+length6+length7+2*length8+2*length9, length1+B3/2,0
-K,10,length2+2*T3+length3,length1+B3/2,0
+K,3, -B1/2, L1+B3/2,0
+K,4, 0, L1+B3/2,0
+K,5, d1, L1+B3/2,0
+K,6, d1+d2, L1+B3/2,0
+K,7, d1+d2+d3, L1+B3/2,0
+K,8, d1+d2+d3+d4, L1+B3/2,0
+K,9, d1+d2+d3+d4+d5, L1+B3/2,0
+K,10,L2,L1+B3/2,0
 L,3,4
 L, 4, 5
 L, 5, 6
@@ -124,55 +131,55 @@ Lsel,u,line,,all
 
 !keypoints for rackets
 
-K,11,length2+length6+length7,length1+B3/2,H3/2+H4/2
-K,12,length2+length6+length7,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
-K,13,length2+length6+length7,length1+B3/2-length4,H3/2+H4/2
-K,14,length2+length6+length7,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
-K,15,length2+length6+length7,length1+B3/2+length5,H3/2+H4/2
+K,11,d1,L1+B3/2,H3/2+H4/2
+K,12,d1,L1+B3/2-Lrackdown/2,H3/2+H4/2	!lower point of force
+K,13,d1,L1+B3/2-Lrackdown,H3/2+H4/2
+K,14,d1,L1+B3/2+Lrackup/2,H3/2+H4/2	!upper point of force
+K,15,d1,L1+B3/2+Lrackup,H3/2+H4/2
 
 L, 11, 12
 L, 12, 13
 L, 11, 14
 L, 14, 15
 
-K,16,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
-K,17,length2+length6+length7+length8,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
-K,18,length2+length6+length7+length8,length1+B3/2-length4,H3/2+H4/2
-K,19,length2+length6+length7+length8,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
-K,20,length2+length6+length7+length8,length1+B3/2+length5,H3/2+H4/2
+K,16,d1+d2,L1+B3/2,H3/2+H4/2
+K,17,d1+d2,L1+B3/2-Lrackdown/2,H3/2+H4/2	!lower point of force
+K,18,d1+d2,L1+B3/2-Lrackdown,H3/2+H4/2
+K,19,d1+d2,L1+B3/2+Lrackup/2,H3/2+H4/2	!upper point of force
+K,20,d1+d2,L1+B3/2+Lrackup,H3/2+H4/2
 
 L, 16, 17
 L, 17, 18
 L, 16, 19
 L, 19, 20
 
-K,21,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
-K,22,length2+length6+length7+length8+length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
-K,23,length2+length6+length7+length8+length9,length1+B3/2-length4,H3/2+H4/2
-K,24,length2+length6+length7+length8+length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
-K,25,length2+length6+length7+length8+length9,length1+B3/2+length5,H3/2+H4/2
+K,21,d1+d2+d3,L1+B3/2,H3/2+H4/2
+K,22,d1+d2+d3,L1+B3/2-Lrackdown/2,H3/2+H4/2	!lower point of force
+K,23,d1+d2+d3,L1+B3/2-Lrackdown,H3/2+H4/2
+K,24,d1+d2+d3,L1+B3/2+Lrackup/2,H3/2+H4/2	!upper point of force
+K,25,d1+d2+d3,L1+B3/2+Lrackup,H3/2+H4/2
 
 L, 21, 22
 L, 22, 23
 L, 21, 24
 L, 24, 25
 
-K,26,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
-K,27,length2+length6+length7+length8+2*length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
-K,28,length2+length6+length7+length8+2*length9,length1+B3/2-length4,H3/2+H4/2
-K,29,length2+length6+length7+length8+2*length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
-K,30,length2+length6+length7+length8+2*length9,length1+B3/2+length5,H3/2+H4/2
+K,26,d1+d2+d3+d4,L1+B3/2,H3/2+H4/2
+K,27,d1+d2+d3+d4,L1+B3/2-Lrackdown/2,H3/2+H4/2	!lower point of force
+K,28,d1+d2+d3+d4,L1+B3/2-Lrackdown,H3/2+H4/2
+K,29,d1+d2+d3+d4,L1+B3/2+Lrackup/2,H3/2+H4/2	!upper point of force
+K,30,d1+d2+d3+d4,L1+B3/2+Lrackup,H3/2+H4/2
 
 L, 26, 27
 L, 27, 28
 L, 26, 29
 L, 29, 30
 
-K,31,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
-K,32,length2+length6+length7+2*length8+2*length9,length1+B3/2-length4/2,H3/2+H4/2	!lower point of force
-K,33,length2+length6+length7+2*length8+2*length9,length1+B3/2-length4,H3/2+H4/2
-K,34,length2+length6+length7+2*length8+2*length9,length1+B3/2+length5/2,H3/2+H4/2	!upper point of force
-K,35,length2+length6+length7+2*length8+2*length9,length1+B3/2+length5,H3/2+H4/2
+K,31,d1+d2+d3+d4+d5,L1+B3/2,H3/2+H4/2
+K,32,d1+d2+d3+d4+d5,L1+B3/2-Lrackdown/2,H3/2+H4/2	!lower point of force
+K,33,d1+d2+d3+d4+d5,L1+B3/2-Lrackdown,H3/2+H4/2
+K,34,d1+d2+d3+d4+d5,L1+B3/2+Lrackup/2,H3/2+H4/2	!upper point of force
+K,35,d1+d2+d3+d4+d5,L1+B3/2+Lrackup,H3/2+H4/2
 
 L, 31, 32
 L, 32, 33
@@ -186,12 +193,12 @@ Lsel,u,line,,all
 
 
 !keypoints for rigid plates
-K, 36,0,length1,0 
-K, 37,length2+length6+length7,length1+B3/2,H3/2+H4/2
-K, 38,length2+length6+length7+length8,length1+B3/2,H3/2+H4/2
-K, 39,length2+length6+length7+length8+length9,length1+B3/2,H3/2+H4/2
-K, 40,length2+length6+length7+length8+2*length9,length1+B3/2,H3/2+H4/2
-K, 41,length2+length6+length7+2*length8+2*length9,length1+B3/2,H3/2+H4/2
+K, 36,0,L1,0 
+K, 37,d1,L1+B3/2,H3/2+H4/2
+K, 38,d1+d2,L1+B3/2,H3/2+H4/2
+K, 39,d1+d2+d3,L1+B3/2,H3/2+H4/2
+K, 40,d1+d2+d3+d4,L1+B3/2,H3/2+H4/2
+K, 41,d1+d2+d3+d4+d5,L1+B3/2,H3/2+H4/2
 L, 36, 4
 L, 37, 5
 L, 38, 6
@@ -214,6 +221,7 @@ CPINTF,rotx,eps
 CPINTF,roty,eps
 CPINTF,rotz,eps
 
+ALLSEL, all
 save
 Fini
 
@@ -260,3 +268,15 @@ ETABLE, bsigmaI, SMISC, 32 	!bending stress in I
 ETABLE, bsigmaJ, SMISC, 37 	!bending stress in J
 ETABLE, asigmaI, SMISC, 31 	!axial stress in I
 ETABLE, asigmaJ, SMISC, 36 	!axial stress in J
+
+PLLS, axI, axJ
+PLLS, shearyI, shearyJ
+PLLS, shearzI, shearzJ
+PLLS, momxI, momxJ
+PLLS, momyI, momyJ
+PLLS, momzI, momzJ
+PLLS, bsigmaI, bsigmaJ
+PLLS, asigmaI, asigmaJ
+ 
+
+PLDISP, 1					! Plot the displaced structure

@@ -53,6 +53,16 @@ Ndivtk = 3
 Ndivcirc = 4
 Sratio = 2
 
+! >> Force definition << 
+
+Sigmaz = -54e3
+Sigmay = -31e3
+Mfx = 425e6
+Mty = 299e6		!vertical axis
+Mfz = -88.5e5		!eing axis
+Preload = 100000/6		!Mpa
+
+
 !------------------------------------!
 !!>>>>>>>> MODEL DEFINITION <<<<<<<<!!
 !------------------------------------!
@@ -525,7 +535,6 @@ vin = _return
 VSBV, vout, vin,,,DELETE, KEEP
 
 ALLSEL
-VTRAN, KCNTO, 151
 
 !-------NUT MESH------!
 TYPE,1
@@ -533,6 +542,8 @@ MAT,1
 MSHAPE,1,3D
 MSHKEY,0
 VMESH,151
+
+NUMCMP,AREA
 
 ! Copy volumes
 ! --- N2 ---
@@ -714,4 +725,46 @@ E,max_node+10,n_node
 NSEL, U, NODE, , n_node
 *ENDDO
 ALLSEL, ALL
+
+F,max_node+10,MZ,Mfz
+F,max_node+10,MX,Mfx
+F,max_node+10,My,Mty
+F,max_node+10,Fz,Ftz
+
+LSWRITE,1
+
+FINISH
+
+!------------------------------------!
+!!>>>>>>>>>>>> SOLUTION <<<<<<<<<<<<!!
+!------------------------------------!
+
+/SOLU
+
+TIME,1
+NSUBST,5
+eqslv,pcg
+
+*DO,ii,0,5
+SLOAD,723+ii,PL01,lock,forc,preload,1,2
+*ENDDO
+
+*DO,iii,0,18
+*DO,ii,0,5
+SLOAD,731+14*iii+ii,PL01,lock,forc,preload,1,2
+*ENDDO
+*ENDDO
+
+MODE,0,0
+NSEL,S,LOC,Y,Hm-eps,Hm+eps
+SF,ALL,PRES,Py
+ALLSEL,ALL
+
+MODE,0,0
+NSEL,S,LOC,Y,H-eps,H+eps
+SF,ALL,PRES,Fny
+ALLSEL,ALL
+
+LSWRITE,1
+LSSOLVE,1
 

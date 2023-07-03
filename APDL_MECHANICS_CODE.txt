@@ -264,10 +264,12 @@ ETABLE, momzI, SMISC, 3 	!moment z in I
 ETABLE, momzJ, SMISC, 16 	!moment z in J
 ETABLE, momyI, SMISC, 2 	!moment z in I
 ETABLE, momyJ, SMISC, 15 	!moment z in J
-ETABLE, bsigmaI, SMISC, 32 	!bending stress in I
-ETABLE, bsigmaJ, SMISC, 37 	!bending stress in J
+ETABLE, bsigmaI, SMISC, 32 	!bending stress y in I
+ETABLE, bsigmaJ, SMISC, 37 	!bending stress y in J
 ETABLE, asigmaI, SMISC, 31 	!axial stress in I
 ETABLE, asigmaJ, SMISC, 36 	!axial stress in J
+ETABLE, csigmaI, SMISC, 34 	!bending stress z in I
+ETABLE, csigmaJ, SMISC, 39 	!bending stress z in J
 
 PLLS, axI, axJ
 PLLS, shearyI, shearyJ

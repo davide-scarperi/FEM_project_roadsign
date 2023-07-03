@@ -61,7 +61,7 @@ Mfx = 425e6
 Mty = 299e6		!vertical axis
 Mfz = -88.5e5		!eing axis
 Ftz = 10
-Preload = 100000/6		!Mpa
+Preload = 100000		!Mpa
 
 
 !------------------------------------!
@@ -679,7 +679,7 @@ TYPE,5
 REAL,i-2000+1
 
 CSYS,i
-NSEL,S,LOC,X,Rh,2*Rh
+NSEL,S,LOC,X,Rh,2.5*Rh
 NSEL,R,LOC,Z,0
 ESURF
 ALLSEL,all
@@ -706,9 +706,16 @@ D, ALL,ALL
 allsel,all
 
 !Fix ortizontal displ. of the nuts
-VSEL, S ,VOLU,,149,169,1 
-NSLV,S,1
-D, ALL,ux,Eps,,,,UZ
+
+*DO,i,2001,2020,1
+
+CSYS,i
+NSEL,S,LOC,X,0,nut_hole_radius
+D, ALL,ux,Eps,,,,uz
+
+*ENDDO
+
+CSYS,0
 
 ! --- MPC LOADS ---
 
@@ -746,15 +753,28 @@ TIME,1
 NSUBST,5
 eqslv,pcg
 
-*DO,ii,0,5
-SLOAD,723+ii,PL01,lock, forc,preload,1,2
+*DO,i,2001,2020,1
+
+CSYS,i
+ASEL,S,LOC,X,0,nut_hole_radius
+ASEL,R,LOC,Z,0
+narea = _return 
+*GET, narea, AREA, 0, NUM, MAX
+SLOAD,narea,PL01,lock, forc,preload,1,2
 *ENDDO
 
-*DO,iii,0,18
-*DO,ii,0,5
-SLOAD,731+14*iii+ii, PL01, lock, forc, preload,1,2
-*ENDDO
-*ENDDO
+CSYS,0
+
+! OLD APPLICATION, INSIDE THE HOLE
+!*DO,ii,0,5
+!SLOAD,723+ii,PL01,lock, forc,preload,1,2
+!*ENDDO
+
+!*DO,iii,0,18
+!*DO,ii,0,5
+!SLOAD,731+14*iii+ii, PL01, lock, forc, preload,1,2
+!*ENDDO
+!*ENDDO
 
 MODE,0,0
 NSEL,S,LOC,Y,Hm-eps,Hm+eps

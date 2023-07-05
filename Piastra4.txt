@@ -55,12 +55,10 @@ Sratio = 2
 
 ! >> Force definition << 
 
-Sigmaz = -54e3
-Sigmay = -31e3
-Mfx = 425e6
-Mty = 299e6		!vertical axis
-Mfz = -88.5e5		!eing axis
-Ftz = 10
+Sigmay = -2 ! -31000/23600
+Mfx = -4.25e8
+Mty = 2.99e8		!vertical axis
+Mfz = -8.85e7		!eing axis
 Preload = 100000		!Mpa
 
 
@@ -468,6 +466,48 @@ ALLS
 
 NUMCMP,VOLU
 
+
+! ---- CONTACT ---- 
+
+ET,4,TARGE170
+ET,5,CONTA174
+KEYOPT, 5, 2, 0 !Contact algorithm: Augmented Lagrangian
+KEYOPT, 5, 7, 1 !Element level time incrementation control: Automatic bisection of increment
+KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset, but with ramped effects
+KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
+
+TYPE, 5
+REAL, 1
+NSEL, S, LOC, Y, 0
+ESURF
+ALLSEL, ALL
+
+K, 5000, -300, 0, 600
+K, 5001, -300, 0, -600
+K, 5002, 300, 0, -600
+K, 5003, 300, 0, 600
+
+L, 5000, 5001
+nline = _return
+L, 5001, 5002
+L, 5002, 5003
+L, 5003, 5000
+
+AL, nline, nline+1, nline+2, nline+3
+LSEL, S, LINE,, nline, nline+3
+LESIZE, ALL,,, Ndivl3
+
+ASLL, S, AREA,, nline, nline+3
+TYPE, 4
+REAL, 1
+ESIZE, 10
+AMESH, ALL
+
+NSLA, S, ALL
+D, ALL, ALL
+
+ALLS
+
 !------------------------------------!
 !!>>>>>>>>>>>>> M27 Nut <<<<<<<<<<<<!!
 !------------------------------------!
@@ -535,12 +575,12 @@ KSEL, S, KP,, 2018, 2023
 LSLK, S, 0
 AL, ALL
 ASLL, S, 0
-VDRAG, ALL,,,,,, naxis
+
+VDRAG, ALL,,,,,, 2
 vin = _return
 
-VSBV, vout, vin,,,DELETE, KEEP
+VADD, vout, vin
 NUMCMP,VOLU
-
 ALLSEL
 
 !-------NUT MESH------!
@@ -670,14 +710,6 @@ CSYS, 0
 
 !-------CONTACT MESH----!
 
-ET,4,TARGE170
-ET,5,CONTA174
-KEYOPT, 5, 2, 0 !Contact algorithm: Augmented Lagrangian
-KEYOPT, 5, 7, 1 !Element level time incrementation control: Automatic bisection of increment
-KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset, but with ramped effects
-KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
-
-! --- N1 ---
 
 *DO,i,2001,2020,1
 
@@ -706,33 +738,35 @@ ALLSEL,ALL
 
 ! ---- CONSTRAINTS ---- 
 
-!Fixed base
-NSEL,S,loc,y,-eps,+eps
-D, ALL,uy
+! !Fixed base
+! NSEL,S,loc,y,-eps,+eps
+! D, ALL,uy
 
-*DO,i,2001,2020,1
+! *DO,i,2001,2020,1
 
-CSYS,i
-ASEL,S,LOC,X,0,rh,rh+eps
-ASEL,R,LOC,Z,-30,-eps
-NSLA,S,1
-D, ALL,ux,Eps,,,,uz
+! CSYS,i
+! ASEL,S,LOC,X,0,rh,rh+eps
+! ASEL,R,LOC,Z,-30,-eps
+! NSLA,S,1
+! D, ALL,ux,Eps,,,,uz
 
-*ENDDO
-CSYS,0
-allsel,all
+! *ENDDO
+! CSYS,0
+! allsel,all
 
-!Fix ortizontal displ. of the nuts
+!Fix displ. of the nuts (base of the screws)
 
 *DO,i,2001,2020,1
 
 CSYS,i
 NSEL,S,LOC,X,0,nut_hole_radius
-D, ALL,ux,Eps,,,,uz
+NSEL,R,LOC,Z,-tko+eps,-tko-eps
+D, ALL,ALL
 
 *ENDDO
 
 CSYS,0
+ALLS
 
 ! --- MPC LOADS ---
 
@@ -754,7 +788,6 @@ ALLSEL, ALL
 F,max_node+10,MZ,Mfz
 F,max_node+10,MX,Mfx
 F,max_node+10,My,Mty
-F,max_node+10,Fz,Ftz
 
 LSWRITE,1
 
@@ -774,27 +807,15 @@ eqslv,pcg
 
 CSYS,i
 ASEL,S,LOC,X,0,nut_hole_radius
-ASEL,R,LOC,Z,0
-narea = _return 
+ASEL,R,LOC,Z,nut_height 
 *GET, narea, AREA, 0, NUM, MAX
 SLOAD,narea,PL01,lock, forc,preload,1,2
 *ENDDO
 
 CSYS,0
 
-! OLD APPLICATION, INSIDE THE HOLE
-!*DO,ii,0,5
-!SLOAD,723+ii, PL01, lock, forc, preload,1,2
-!*ENDDO
-
-!*DO,iii,0,18
-!*DO,ii,0,5
-!SLOAD,731+14*iii+ii, PL01, lock, forc, preload,1,2
-!*ENDDO
-!*ENDDO
-
 MODE,0,0
-NSEL,S,LOC,Y,Hm-eps,Hm+eps
+NSEL,S,LOC,Y,H-eps,H+eps
 SF, ALL, PRES, Sigmay
 ALLSEL,ALL
 

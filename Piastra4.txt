@@ -702,7 +702,18 @@ ALLSEL,ALL
 
 !Fixed base
 NSEL,S,loc,y,-eps,+eps
-D, ALL,ALL
+D, ALL,uy
+
+*DO,i,2001,2020,1
+
+CSYS,i
+ASEL,S,LOC,X,0,rh,rh+eps
+ASEL,R,LOC,Z,-30,-eps
+NSLA,S,1
+D, ALL,ux,Eps,,,,uz
+
+*ENDDO
+CSYS,0
 allsel,all
 
 !Fix ortizontal displ. of the nuts
@@ -767,7 +778,7 @@ CSYS,0
 
 ! OLD APPLICATION, INSIDE THE HOLE
 !*DO,ii,0,5
-!SLOAD,723+ii,PL01,lock, forc,preload,1,2
+!SLOAD,723+ii, PL01, lock, forc, preload,1,2
 !*ENDDO
 
 !*DO,iii,0,18

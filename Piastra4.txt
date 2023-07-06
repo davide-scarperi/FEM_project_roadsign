@@ -31,7 +31,7 @@ z_ctr = 170*3			! z coordinate of the centers along L2half
 hdist_vert = 170		! Distance between the centers along L1half
 hdist_hor = 105			! Distance between the centers along L2half
 
-! >> M27 Nut dimensions <<
+! >> M27 Nut dimensions <<as
 nut_hole_radius = 27/2 		! d
 nut_height = 22			! m
 nut_ext_radius = 45.63/2	! e
@@ -469,7 +469,7 @@ NUMCMP, ALL
 
 ! ---- CONTACT ---- 
 
-MP,EX,2,1000000000
+MP,EX,2,100000000000
 MAT,2
 
 ET,4,TARGE170
@@ -480,17 +480,11 @@ KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset,
 KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
 R,1
 
-TYPE, 5
-REAL, 1
-NSEL, S, LOC, Y, 0
-ESURF
-ALLSEL, ALL
-
 K, 5000, -300, 0, 600
 K, 5001, -300, 0, -600
 K, 5002, 300, 0, -600
 K, 5003, 300, 0, 600
-K, 4999,-300, -10, 600
+K, 4999,-300, -5, 600
 
 L, 4999, 5000
 L, 5000, 5001
@@ -502,17 +496,38 @@ L, 5003, 5000
 AL, nline, nline+1, nline+2, nline+3
 narea = _return
 LSEL, S, LINE,, nline, nline+3
-LESIZE, ALL,,, Ndivl3
-VDRA
+LESIZE, ALL,,, 10*Ndivl3
 
 ASLL, S, AREA,, nline, nline+3
-VDRAG,
-TYPE, 4
-REAL, 1
-ESIZE, 10
-AMESH, ALL
+VDRAG,ALL,,,,,,nline-1
+nvol = _return
 
-NSLA, S, ALL
+TYPE,1
+MAT,2
+MSHAPE,0,3D
+MSHKEY,1
+VMESH,nvol
+
+TYPE,5
+REAL,1
+VSEL,S,VOLU,,NVOL
+NSLV,S,1
+NSEL,R,LOC,Y,0
+ESURF
+ALLSEL,ALL
+
+
+TYPE,4
+REAL,1
+VSEL,S,LOC,Y,EPS,tko
+NSLV,S,1
+NSEL,R,LOC,Y,0
+ESURF
+ALLSEL,all
+
+
+VSEL,S,VOLU,,NVOL
+NSLV,S,1
 D, ALL, ALL
 
 ALLS
@@ -731,14 +746,15 @@ TYPE,7
 REAL,i-2000+1
 
 CSYS,i
-NSEL,S,LOC,X,Rh,2.5*Rh
-NSEL,R,LOC,Z,0
+ASEL,S,LOC,X,Rh,2.5*Rh
+ASEL,R,LOC,Z,0
+NSLA,S,1
 ESURF
 ALLSEL,all
 
 TYPE,6
 REAL,i-2000+1
-ASEL,S,LOC,X,0,2*Rh
+ASEL,S,LOC,X,0,nut_hole_radius
 ASEL,R,LOC,Z,0
 NSLA,S,1
 ESURF

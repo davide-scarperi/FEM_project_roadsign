@@ -403,7 +403,7 @@ L,10,66		!144
 L,66,18		!145
 CSYS,0
 LSEL,S,LINE,,144,145
-LESIZE,ALL,,,Ndivl1
+LESIZE,ALL,,,2*Ndivl1
 ALLSEL,ALL
 
 ! Areas
@@ -845,5 +845,5 @@ LSSOLVE,1
 vsel,s,volu,,vout,vout+20
 vsel,a,volu,,nvol
 eslv,s,1
-esel,a,type,,2,tmp
+esel,a,type,,2,tmp+1
 esel,inve

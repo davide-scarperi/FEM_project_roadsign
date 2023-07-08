@@ -34,7 +34,7 @@ hdist_hor = 105			! Distance between the centers along L2half
 ! >> M27 Nut dimensions <<as
 nut_hole_radius = 27/2 		! d
 nut_height = 22			! m
-nut_ext_radius = 45.63/2	! e
+nut_ext_radius = 50/2	! e
 
 Eps = 1E-4	! selection tolerance
 
@@ -56,10 +56,10 @@ Sratio = 2
 ! >> Force definition << 
 
 Sigmay = -2 ! -31000/23600
-Mfx = -4.25e8
-Mty = 2.99e8		!vertical axis
+Mfx = -7.55e7
+Mty = 5.18e7		!vertical axis
 Mfz = -8.85e7		!eing axis
-Preload = 100000		!Mpa
+Preload = 50000		!N
 
 
 !------------------------------------!
@@ -149,7 +149,7 @@ K, 51, R2, 90, 0
 L, 50, 51 
 ncline = _return
 
-LESIZE,ncline ,,,2*Ndivl1
+LESIZE,ncline ,,,4*Ndivl1
 VDRAG, 8,12,16,,,,ncline
 
 CSYS, 0
@@ -249,7 +249,7 @@ LESIZE,ALL,L1division
 ! While for line that must match with different length it's
 ! necessary divide the line in a precise number of elements
 LSEL,S,LINE,,83,88,5
-LESIZE,ALL,,,Ndivl1
+LESIZE,ALL,,,2*Ndivl1
 LSEL,S,LINE,,84,87,3
 LESIZE,ALL,,,8
 ALLSEL,ALL
@@ -508,7 +508,7 @@ MSHAPE,0,3D
 MSHKEY,1
 VMESH,nvol
 
-TYPE,5
+TYPE,4
 REAL,1
 VSEL,S,VOLU,,NVOL
 NSLV,S,1
@@ -517,7 +517,7 @@ ESURF
 ALLSEL,ALL
 
 
-TYPE,4
+TYPE,5
 REAL,1
 VSEL,S,LOC,Y,EPS,tko
 NSLV,S,1
@@ -566,7 +566,6 @@ L, 2021, 2022
 L, 2022, 2023
 L, 2023, 2018
 
-CSYS, 0
 L, 2012, 2013
 L, 2013, 2014
 L, 2014, 2015
@@ -574,6 +573,7 @@ L, 2015, 2016
 L, 2016, 2017
 L, 2017, 2012
 
+CSYS, 0
 L, 2010, 2011
 naxis = _return 
 
@@ -733,16 +733,17 @@ CSYS, 0
 
 
 !-------CONTACT MESH----!
-ET,6,TARGE170
-ET,7,CONTA174
+tmp=6      	!Actual type number free
+*DO,i,2001,2020,1
+
+ET,tmp,TARGE170
+ET,tmp+1,CONTA174
 KEYOPT, 5, 2, 0 !Contact algorithm: Augmented Lagrangian
 KEYOPT, 5, 7, 1 !Element level time incrementation control: Automatic bisection of increment
 KEYOPT, 5, 9, 2 !Include both initial geometrical penetration or gap and offset, but with ramped effects
 KEYOPT, 5, 10, 2 !Contact stiffness update: Each iteration
 
-*DO,i,2001,2020,1
-
-TYPE,7
+TYPE,tmp+1
 REAL,i-2000+1
 
 CSYS,i
@@ -752,7 +753,7 @@ NSLA,S,1
 ESURF
 ALLSEL,all
 
-TYPE,6
+TYPE,tmp
 REAL,i-2000+1
 ASEL,S,LOC,X,0,nut_hole_radius
 ASEL,R,LOC,Z,0
@@ -760,8 +761,17 @@ NSLA,S,1
 ESURF
 ALLSEL,all
 
-
+tmp=tmp+2
 *ENDDO
+
+CSYS,0
+ALLSEL,ALL
+
+ET,tmp,179
+TYPE,tmp
+*do,ii,0,19,1
+psmesh,5001+ii,pret,,V,vout+ii,2001+ii,Z,-tko+10
+*enddo
 
 CSYS,0
 ALLSEL,ALL
@@ -786,9 +796,9 @@ ALLS
 
 *GET, max_node, NODE, 0, NUM, MAXD
 N,max_node+10,0,1.1*H,0 !create 'master' node for MPC184's
-ET,8,184
-KEYOPT,8,1,1
-TYPE,8
+ET,tmp+1,184
+KEYOPT,tmp+1,1,1
+TYPE,tmp+1
 
 NSEL, S, LOC, Y, H-eps,H+eps
 *GET, num_nodes, NODE, 0, COUNT
@@ -817,22 +827,23 @@ TIME,1
 NSUBST,5
 eqslv,pcg
 
-*DO,i,2001,2020,1
-
-CSYS,i
-ASEL,S,LOC,X,0,nut_hole_radius
-ASEL,R,LOC,Z,nut_height 
-*GET, narea, AREA, 0, NUM, MAX
-SLOAD,narea,PL01,lock, forc,preload,1,2
+*DO,ii,0,20,1
+SLOAD,5001+ii,PL01,lock, forc,preload,1,2
 *ENDDO
 
 CSYS,0
 
 MODE,0,0
-NSEL,S,LOC,Y,H-eps,H+eps
+NSEL,S,LOC,Y,H,H+eps
 SF, ALL, PRES, Sigmay
 ALLSEL,ALL
 
 LSWRITE,1
 LSSOLVE,1
 
+
+vsel,s,volu,,vout,vout+20
+vsel,a,volu,,nvol
+eslv,s,1
+esel,a,type,,2,tmp
+esel,inve
